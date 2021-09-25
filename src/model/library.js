@@ -53,7 +53,7 @@ const createScreenshotHandler = (options) => async (data, flow, meta) => {
     buffer = await page.pdf({...sanitizedOptions});
   }
   else {
-    buffer = await page.screenshot({...sanitizedOptions});
+    buffer = await page.screenshot({fullPage: true, ...sanitizedOptions});
   }
 
   await browser.close();
