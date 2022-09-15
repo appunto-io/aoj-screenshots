@@ -13,11 +13,15 @@ const createScreenshotHandler = (options) => async (data, flow, meta) => {
     contentDispositionFileName,
     type = 'png',
     puppeteerOptions = {format : 'A4'},
+    headerTemplate,
+    footerTemplate
   } = options;
 
   const { request, response } = meta;
 
-  const { type : _trash1, path : _trash2, ...sanitizedOptions } = puppeteerOptions;
+  const computedOptions = typeof puppeteerOptions === 'function' ? await puppeteerOptions(request.query) : puppeteerOptions;
+
+  const { type : _trash1, path : _trash2, ...sanitizedOptions } = computedOptions;
 
 
   if(!renderer && !loader) {
@@ -50,7 +54,18 @@ const createScreenshotHandler = (options) => async (data, flow, meta) => {
 
   let buffer;
   if(type === 'pdf') {
-    buffer = await page.pdf({...sanitizedOptions});
+    const headerHTML = typeof headerTemplate === 'function' ?
+      await headerTemplate(request.query) :
+      headerTemplate ? headerTemplate :
+      '';
+
+    const footerHTML = typeof footerTemplate === 'function' ?
+      await footerTemplate(request.query) :
+      footerTemplate ? footerTemplate :
+      '';
+
+
+    buffer = await page.pdf({...sanitizedOptions, headerTemplate : headerHTML, footerTemplate : footerHTML});
   }
   else {
     buffer = await page.screenshot({fullPage: true, ...sanitizedOptions});
