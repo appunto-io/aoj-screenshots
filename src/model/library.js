@@ -7,6 +7,7 @@ const createScreenshotHandler = (options) => async (data, flow, meta) => {
   console.info('screenshotsHandler()');
 
   const {
+    dataLoader = () => {},
     renderer,
     loader,
     contentDisposition = 'attachment',
@@ -19,7 +20,9 @@ const createScreenshotHandler = (options) => async (data, flow, meta) => {
 
   const { request, response } = meta;
 
-  const computedOptions = typeof puppeteerOptions === 'function' ? await puppeteerOptions(request.query) : puppeteerOptions;
+  data = await dataLoader(request.query, request.params);
+
+  const computedOptions = typeof puppeteerOptions === 'function' ? await puppeteerOptions(request.query, data) : puppeteerOptions;
 
   const { type : _trash1, path : _trash2, ...sanitizedOptions } = computedOptions;
 
@@ -44,23 +47,23 @@ const createScreenshotHandler = (options) => async (data, flow, meta) => {
 
   // Load content into page
   if(renderer) {
-    const html = await renderer(request.query);
+    const html = await renderer(request.query, data);
     await page.setContent(html);
   }
   else if (loader) {
-    const url = await loader(request.query);
+    const url = await loader(request.query, data);
     await page.goto(url);
   }
 
   let buffer;
   if(type === 'pdf') {
     const headerHTML = typeof headerTemplate === 'function' ?
-      await headerTemplate(request.query) :
+      await headerTemplate(request.query, data) :
       headerTemplate ? headerTemplate :
       '';
 
     const footerHTML = typeof footerTemplate === 'function' ?
-      await footerTemplate(request.query) :
+      await footerTemplate(request.query, data) :
       footerTemplate ? footerTemplate :
       '';
 
@@ -77,7 +80,7 @@ const createScreenshotHandler = (options) => async (data, flow, meta) => {
     (
       `; filename="${
         typeof contentDispositionFileName === 'function' ?
-          contentDispositionFileName(request.query) :
+          contentDispositionFileName(request.query, data) :
           contentDispositionFileName
       }"`
     ) :
