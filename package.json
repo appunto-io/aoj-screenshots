@@ -1,6 +1,6 @@
 {
   "name": "@appunto/aoj-screenshots",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Server side HTMLT to PDF/PNG/... converter",
   "main": "src/index.js",
   "scripts": {
