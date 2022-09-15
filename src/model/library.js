@@ -76,7 +76,7 @@ const createScreenshotHandler = (options) => async (data, flow, meta) => {
 
   await browser.close();
 
-  const _cdFileName = contentDisposition === 'attachment' && contentDispositionFileName ?
+  const _cdFileName = contentDispositionFileName ?
     (
       `; filename="${
         typeof contentDispositionFileName === 'function' ?
